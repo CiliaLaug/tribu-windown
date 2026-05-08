@@ -78,13 +78,19 @@ def extract_box_type(item_name: str) -> str:
 
 
 def is_special_box(box_type: str) -> bool:
-    """Special boxes: return choice → manual handling, no pending_return."""
+    """Special boxes: return choice → manual handling, no pending_return.
+    Accepts both canonical keys ('reh') and raw Circuly item names ('[+15M] Reh Box')."""
+    if box_type not in BOX_CATALOG:
+        box_type = extract_box_type(box_type)
     return BOX_CATALOG.get(box_type, {}).get("special", False)
 
 
 def get_price(box_type: str) -> float:
-    """Return buyout price for a given canonical box type key.
+    """Return buyout price for a given box type key or raw Circuly item name.
+    Accepts both canonical keys ('reh') and raw item names ('[+15M] Reh Box').
     Falls back to 49.99 for unknown/empty box types."""
+    if box_type not in BOX_CATALOG:
+        box_type = extract_box_type(box_type)
     return BOX_CATALOG.get(box_type, {}).get("price", 49.99)
 
 
