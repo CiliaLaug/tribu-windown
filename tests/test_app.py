@@ -25,7 +25,7 @@ FAKE_CUSTOMER = {
 
 @patch("app.notion_log.get_customer_by_token", return_value=None)
 def test_landing_invalid_token(mock_notion, client):
-    resp = client.get("/?token=badtoken")
+    resp = client.get("/bye?token=badtoken")
     assert resp.status_code == 200
     assert "Tribu Box" in resp.data.decode()
     # Should not show the choice page — neutral error
@@ -36,13 +36,13 @@ def test_landing_invalid_token(mock_notion, client):
 def test_landing_already_processed(mock_notion, client):
     customer = {**FAKE_CUSTOMER, "status": "keep"}
     mock_notion.return_value = customer
-    resp = client.get("/?token=validtoken")
+    resp = client.get("/bye?token=validtoken")
     assert b"bereits" in resp.data
 
 
 @patch("app.notion_log.get_customer_by_token", return_value=FAKE_CUSTOMER)
 def test_landing_pending_shows_page(mock_notion, client):
-    resp = client.get("/?token=validtoken")
+    resp = client.get("/bye?token=validtoken")
     assert resp.status_code == 200
     assert b"49,99" in resp.data
 
