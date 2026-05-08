@@ -100,9 +100,8 @@ def submit():
         if choice == "keep":
             sub_id, box_type = circuly.get_active_subscription(customer_id)
             notion_log.store_box_type(page_id, box_type)
-            price_str = format_price(circuly.get_price(box_type))
             circuly.process_buyout(sub_id)
-            freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation(name, price_str))
+            freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation(name))
             notion_log.mark_processed(page_id, "keep")
         else:
             _process_end(customer, is_fallback=False)

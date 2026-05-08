@@ -15,11 +15,12 @@ def _greeting(name: str) -> str:
     return f"<p>Hallo {name},</p>" if name else "<p>Hallo,</p>"
 
 
-def keep_confirmation(name: str = "", price_str: str = "€49,99") -> str:
-    """Customer chose to keep their box — buyout processed."""
+def keep_confirmation(name: str = "") -> str:
+    """Customer chose to keep their box — buyout processing."""
     return f"""
 {_greeting(name)}
-<p>wie schön! Deine Box gehört jetzt offiziell dir. 🎉 Wir haben den Betrag von <strong>{price_str}</strong> erfolgreich verarbeitet – du musst nichts weiter tun.</p>
+<p>wie schön! Deine Box gehört jetzt offiziell dir. 🎉 Deine Zahlung wird gerade verarbeitet – du musst nichts weiter tun.</p>
+<p>Deine Rechnung findest du innerhalb von 24 Stunden in deinem Kundenkonto.</p>
 <p>Wir hoffen, dass sie noch lange Freude bringt. Von ganzem Herzen danke, dass du Teil der Tribu-Familie warst.</p>
 {_signature()}
 """
