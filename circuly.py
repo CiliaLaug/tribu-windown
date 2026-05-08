@@ -8,10 +8,35 @@ load_dotenv()
 CIRCULY_BASE = "https://api.circuly.io/api/2025-01"
 CIRCULY_VERSION = "2025-01"
 
-SPECIAL_BOX_TYPES = {"igel", "maus", "fuchs", "bär", "ente", "reh", "wildschwein"}
-NON_SPECIAL_BOX_TYPES = {"hase", "wolf", "eichhörnchen", "waschbär", "eule",
-                          "gravitrax", "tiptoi", "safari", "brio", "connetix", "modu"}
-ALL_KNOWN_BOX_TYPES = SPECIAL_BOX_TYPES | NON_SPECIAL_BOX_TYPES
+BOX_CATALOG = {
+    # special=True → return path requires manual handling (no pending_return)
+    "igel":          {"price": 29.99,  "special": True},
+    "maus":          {"price": 29.99,  "special": True},
+    "fuchs":         {"price": 29.99,  "special": True},
+    "bär":           {"price": 29.99,  "special": True},
+    "ente":          {"price": 29.99,  "special": True},
+    "reh":           {"price": 29.99,  "special": True},
+    "wildschwein":   {"price": 29.99,  "special": True},
+    # special=False → return path uses set_end_date → pending_return
+    "hase":          {"price": 69.99,  "special": False},
+    "wolf":          {"price": 69.99,  "special": False},
+    "eichhörnchen":  {"price": 69.99,  "special": False},
+    "waschbär":      {"price": 69.99,  "special": False},
+    "eule":          {"price": 69.99,  "special": False},
+    "gravitrax":     {"price": 99.99,  "special": False},
+    "tiptoi":        {"price": 99.99,  "special": False},
+    "schleich":      {"price": 99.99,  "special": False},
+    "safari":        {"price": 99.99,  "special": False},
+    "brio":          {"price": 99.99,  "special": False},
+    "connetix":      {"price": 99.99,  "special": False},
+    "modu":          {"price": 169.99, "special": False},
+}
+
+# Umlaut-less aliases seen in some Circuly item names → canonical key
+_BOX_ALIASES = {
+    "eichhorn": "eichhörnchen",
+    "waschbar": "waschbär",
+}
 
 
 class CirculyError(Exception):
@@ -37,18 +62,30 @@ def _headers() -> dict:
 
 
 def extract_box_type(item_name: str) -> str:
-    """Extract box type from item name. Returns lowercase keyword or 'other'.
-    Longest keyword matched first so 'waschbär' beats 'bär'."""
+    """Extract canonical box type keyword from Circuly item name.
+    Checks aliases first (longest-first), then catalog keys (longest-first).
+    Returns 'other' if no match found."""
     name_lower = item_name.lower()
-    for box in sorted(ALL_KNOWN_BOX_TYPES, key=len, reverse=True):
-        if box in name_lower:
-            return box
+    # Check aliases first — resolve to canonical key
+    for alias in sorted(_BOX_ALIASES, key=len, reverse=True):
+        if alias in name_lower:
+            return _BOX_ALIASES[alias]
+    # Check catalog keys
+    for key in sorted(BOX_CATALOG, key=len, reverse=True):
+        if key in name_lower:
+            return key
     return "other"
 
 
 def is_special_box(box_type: str) -> bool:
     """Special boxes: return choice → manual handling, no pending_return."""
-    return box_type in SPECIAL_BOX_TYPES
+    return BOX_CATALOG.get(box_type, {}).get("special", False)
+
+
+def get_price(box_type: str) -> float:
+    """Return buyout price for a given canonical box type key.
+    Falls back to 49.99 for unknown/empty box types."""
+    return BOX_CATALOG.get(box_type, {}).get("price", 49.99)
 
 
 def get_active_subscription(customer_id: str) -> tuple:
