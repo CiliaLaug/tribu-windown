@@ -78,7 +78,9 @@ def process_buyout(subscription_id: str) -> None:
         auth=_auth(),
         headers=_headers(),
     )
-    resp.raise_for_status()
+    if not resp.ok:
+        msg = resp.json().get("message", resp.text) if resp.content else resp.reason
+        raise CirculyError(f"process-buyout failed ({resp.status_code}): {msg}")
     body = resp.json()
     if "message" in body and "not allowed" in body["message"].lower():
         raise CirculyError(body["message"])
@@ -97,4 +99,6 @@ def set_end_date(subscription_id: str, end_date: str) -> None:
         auth=_auth(),
         headers=_headers(),
     )
-    resp.raise_for_status()
+    if not resp.ok:
+        msg = resp.json().get("message", resp.text) if resp.content else resp.reason
+        raise CirculyError(f"set_end_date failed ({resp.status_code}): {msg}")
