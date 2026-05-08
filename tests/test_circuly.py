@@ -30,12 +30,15 @@ def test_get_active_subscription_none_found(mock_get):
 
 
 @patch("circuly.requests.get")
-def test_get_active_subscription_multiple_found(mock_get):
+def test_get_active_subscription_multiple_picks_newest(mock_get):
+    """With 2+ active subs, should pick the most recently created one, not raise."""
+    older = {**FAKE_SUB, "id": "sub_old", "created_at": "2024-01-01T00:00:00.000000Z"}
+    newer = {**FAKE_SUB, "id": "sub_new", "created_at": "2025-01-01T00:00:00.000000Z"}
     mock_get.return_value.status_code = 200
-    mock_get.return_value.json.return_value = {"data": [FAKE_SUB, FAKE_SUB]}
+    mock_get.return_value.json.return_value = {"data": [older, newer]}
 
-    with pytest.raises(CirculyError, match="2 active subscriptions"):
-        get_active_subscription("cus_123")
+    sub_id, box_type = get_active_subscription("cus_123")
+    assert sub_id == "sub_new"
 
 
 @patch("circuly.requests.post")
@@ -79,3 +82,23 @@ def test_box_type_extraction_unknown():
     from circuly import extract_box_type, is_special_box
     assert extract_box_type("Unknown Product") == "other"
     assert is_special_box("other") is False
+
+
+def test_box_type_extraction_waschbaer_not_special():
+    """Waschbär must not match 'bär' (special) — longest match wins."""
+    from circuly import extract_box_type, is_special_box
+    assert extract_box_type("[+30M] Waschbär Box | annual") == "waschbär"
+    assert is_special_box("waschbär") is False
+
+
+def test_box_type_extraction_baer_is_special():
+    """Plain Bär Box must still be special."""
+    from circuly import extract_box_type, is_special_box
+    assert extract_box_type("[+9M] Bär Box | annual") == "bär"
+    assert is_special_box("bär") is True
+
+
+def test_box_type_extraction_eichhoernchen_not_special():
+    from circuly import extract_box_type, is_special_box
+    assert extract_box_type("[+27M] Eichhörnchen Box | annual") == "eichhörnchen"
+    assert is_special_box("eichhörnchen") is False

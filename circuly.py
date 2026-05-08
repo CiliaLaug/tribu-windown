@@ -9,7 +9,9 @@ CIRCULY_BASE = "https://api.circuly.io/api/2025-01"
 CIRCULY_VERSION = "2025-01"
 
 SPECIAL_BOX_TYPES = {"igel", "maus", "fuchs", "bär", "ente", "reh", "wildschwein"}
-ALL_KNOWN_BOX_TYPES = SPECIAL_BOX_TYPES | {"hase"}
+NON_SPECIAL_BOX_TYPES = {"hase", "wolf", "eichhörnchen", "waschbär", "eule",
+                          "gravitrax", "tiptoi", "safari", "brio", "connetix", "modu"}
+ALL_KNOWN_BOX_TYPES = SPECIAL_BOX_TYPES | NON_SPECIAL_BOX_TYPES
 
 
 class CirculyError(Exception):
@@ -25,9 +27,10 @@ def _headers() -> dict:
 
 
 def extract_box_type(item_name: str) -> str:
-    """Extract box type from item name. Returns lowercase animal name or 'other'."""
+    """Extract box type from item name. Returns lowercase keyword or 'other'.
+    Longest keyword matched first so 'waschbär' beats 'bär'."""
     name_lower = item_name.lower()
-    for box in ALL_KNOWN_BOX_TYPES:
+    for box in sorted(ALL_KNOWN_BOX_TYPES, key=len, reverse=True):
         if box in name_lower:
             return box
     return "other"
@@ -52,10 +55,11 @@ def get_active_subscription(customer_id: str) -> tuple:
     resp.raise_for_status()
     data = resp.json().get("data", [])
 
-    if len(data) != 1:
-        raise CirculyError(f"{len(data)} active subscriptions found for {customer_id}")
+    if len(data) == 0:
+        raise CirculyError(f"0 active subscriptions found for {customer_id}")
 
-    sub = data[0]
+    # If multiple active subs, use the most recently created one
+    sub = sorted(data, key=lambda s: s.get("created_at", ""), reverse=True)[0]
     sub_id = sub["id"]
     item_name = sub.get("item", {}).get("name", "")
     box_type = extract_box_type(item_name)

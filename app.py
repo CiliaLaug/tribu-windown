@@ -88,6 +88,12 @@ def landing():
         )
 
     box_type = customer.get("box_type", "")
+    if not box_type:
+        # box_type missing at send time — fetch live from Circuly
+        try:
+            _, box_type = circuly.get_active_subscription(customer["customer_id"])
+        except circuly.CirculyError:
+            box_type = ""
     price = get_price(box_type)
     price_str = format_price(price)
 

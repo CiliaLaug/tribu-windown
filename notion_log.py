@@ -41,6 +41,7 @@ def get_customer_by_token(token: str) -> Optional[dict]:
     result = client.databases.query(
         database_id=_get_db_id(),
         filter={"property": "token", "rich_text": {"equals": token}},
+        sorts=[{"property": "sent_at", "direction": "descending"}],
     )
     pages = result.get("results", [])
     if not pages:

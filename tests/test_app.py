@@ -41,11 +41,11 @@ def test_landing_already_processed(mock_notion, client):
     assert b"bereits" in resp.data
 
 
-@patch("app.notion_log.get_customer_by_token", return_value=FAKE_CUSTOMER)
+@patch("app.notion_log.get_customer_by_token", return_value={**FAKE_CUSTOMER, "box_type": "hase"})
 def test_landing_pending_shows_page(mock_notion, client):
     resp = client.get("/?token=validtoken")
     assert resp.status_code == 200
-    assert b"49,99" in resp.data
+    assert b"69,99" in resp.data  # hase → €69,99
 
 
 # --- POST /submit ---
