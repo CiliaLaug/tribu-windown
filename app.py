@@ -20,7 +20,7 @@ app = Flask(__name__)
 _PRICE_TIERS = [
     (29.99,  ["igel", "maus", "fuchs", "bär", "ente", "reh", "wildschwein"]),
     (69.99,  ["hase", "wolf", "eichhörnchen", "eichhorn", "waschbär", "waschbar", "eule"]),
-    (99.99,  ["gravitrax", "tiptoi", "schleich", "brio", "connetix"]),
+    (99.99,  ["gravitrax", "tiptoi", "schleich", "safari", "brio", "connetix"]),
     (169.99, ["modu"]),
 ]
 
