@@ -26,10 +26,16 @@ _PRICE_TIERS = [
 
 
 def get_price(box_type: str) -> float:
-    """Return buyout price for a given box_type string (matched by keyword)."""
+    """Return buyout price for a given box_type string (matched by keyword).
+    Longer keywords are checked first so 'waschbär' beats 'bär'."""
     bt = box_type.lower()
-    for price, keywords in _PRICE_TIERS:
-        if any(kw in bt for kw in keywords):
+    candidates = sorted(
+        ((kw, price) for price, keywords in _PRICE_TIERS for kw in keywords),
+        key=lambda x: len(x[0]),
+        reverse=True,
+    )
+    for kw, price in candidates:
+        if kw in bt:
             return price
     return 49.99  # fallback for unknown box types
 
