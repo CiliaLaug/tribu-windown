@@ -134,27 +134,32 @@ def submit():
 
     except circuly.CirculyNoSubscriptionError as e:
         logging.warning(f"No active subscription for {customer_id} — customer inactive")
-        notion_log.mark_error(page_id, "inactive_no_active_subscription")
+        notion_log.mark_error(page_id, "inactive_no_active_subscription",
+            notes=f"Customer has no active subscription in Circuly. They may have already cancelled before wind-down. Check Circuly customer page: {customer_id}")
         return jsonify({"ok": False, "error": "no_subscription"}), 200
 
     except circuly.CirculyMultipleSubscriptionsError as e:
         logging.warning(f"Multiple subscriptions for {customer_id} — flagged for manual review")
-        notion_log.mark_error(page_id, "manual_review_multiple_subscriptions")
+        notion_log.mark_error(page_id, "manual_review_multiple_subscriptions",
+            notes=f"Customer has multiple active subscriptions in Circuly — cannot auto-process. Check Circuly and decide which subscription to act on: {customer_id}")
         return jsonify({"ok": False, "error": "multiple_subscriptions"}), 200
 
     except circuly.CirculyError as e:
         logging.error(f"Circuly error for {customer_id}: {e}")
-        notion_log.mark_error(page_id, f"circuly_error: {e}")
+        notion_log.mark_error(page_id, f"circuly_error: {e}",
+            notes=f"Circuly API call failed. Check if subscription is in a valid state and retry manually. Error: {e}")
         return jsonify({"ok": False, "error": "processing error"}), 500
 
     except freshdesk.FreshdeskError as e:
         logging.error(f"Freshdesk error for {customer_id} (Circuly already done): {e}")
-        notion_log.mark_error(page_id, "circuly_done_freshdesk_failed")
+        notion_log.mark_error(page_id, "circuly_done_freshdesk_failed",
+            notes=f"Circuly was processed successfully but Freshdesk reply/close failed. Send confirmation email manually to customer and close ticket. Error: {e}")
         return jsonify({"ok": False, "error": "processing error"}), 500
 
     except Exception as e:
         logging.error(f"Unexpected error for {customer_id}: {e}")
-        notion_log.mark_error(page_id, f"unexpected_error: {e}")
+        notion_log.mark_error(page_id, f"unexpected_error: {e}",
+            notes=f"Unexpected error — check server logs for full traceback. Error: {e}")
         return jsonify({"ok": False, "error": "processing error"}), 500
 
     return jsonify({"ok": True})

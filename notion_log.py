@@ -72,17 +72,17 @@ def mark_processed(page_id: str, status: str) -> None:
     )
 
 
-def mark_error(page_id: str, error_detail: str) -> None:
-    """Set status=error and populate error_detail. Row appears red in Notion."""
+def mark_error(page_id: str, error_detail: str, notes: str = "") -> None:
+    """Set status=error and populate error_detail (and optional notes). Row appears red in Notion."""
     client = get_client()
-    client.pages.update(
-        page_id=page_id,
-        properties={
-            "status": {"select": {"name": "error"}},
-            "error_detail": {"rich_text": [{"text": {"content": error_detail}}]},
-            "processed_at": {"date": {"start": date.today().isoformat()}},
-        },
-    )
+    props = {
+        "status": {"select": {"name": "error"}},
+        "error_detail": {"rich_text": [{"text": {"content": error_detail}}]},
+        "processed_at": {"date": {"start": date.today().isoformat()}},
+    }
+    if notes:
+        props["notes"] = {"rich_text": [{"text": {"content": notes}}]}
+    client.pages.update(page_id=page_id, properties=props)
 
 
 def get_pending_expired(cutoff: date) -> list:
