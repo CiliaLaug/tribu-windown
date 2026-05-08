@@ -32,6 +32,7 @@ def _parse_page(page: dict) -> dict:
         "status": p["status"]["select"]["name"] if p["status"]["select"] else None,
         "error_detail": _text(p["error_detail"]),
         "box_type": _text(p["box_type"]) if "box_type" in p else "",
+        "name": _text(p["name"]) if "name" in p else "",
     }
 
 

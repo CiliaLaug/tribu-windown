@@ -28,15 +28,17 @@ def _process_end(customer: dict, is_fallback: bool = False) -> None:
     sub_id, box_type = circuly.get_active_subscription(customer_id)
     notion_log.store_box_type(page_id, box_type)
 
+    name = customer.get("name", "")
+
     if circuly.is_special_box(box_type):
         # Special box: send keep/donate/recycle email, flag for manual handling
-        body = email_copy.fallback_special_box() if is_fallback else email_copy.return_confirmation_special_box()
+        body = email_copy.fallback_special_box(name) if is_fallback else email_copy.return_confirmation_special_box(name)
         freshdesk.reply_and_close(ticket_id, body)
         notion_log.mark_error(page_id, "manual_review_end_subscription")
     else:
         # Standard box: set end date → pending_return, send return email
         circuly.set_end_date(sub_id, date.today().isoformat())
-        body = email_copy.fallback_standard() if is_fallback else email_copy.return_confirmation_standard()
+        body = email_copy.fallback_standard(name) if is_fallback else email_copy.return_confirmation_standard(name)
         freshdesk.reply_and_close(ticket_id, body)
         status = "fallback" if is_fallback else "end"
         notion_log.mark_processed(page_id, status)
@@ -84,7 +86,7 @@ def submit():
             sub_id, box_type = circuly.get_active_subscription(customer_id)
             notion_log.store_box_type(page_id, box_type)
             circuly.process_buyout(sub_id)
-            freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation())
+            freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation(customer.get("name", "")))
             notion_log.mark_processed(page_id, "keep")
         else:
             _process_end(customer, is_fallback=False)
