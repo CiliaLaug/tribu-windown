@@ -18,6 +18,11 @@ class CirculyError(Exception):
     pass
 
 
+class CirculyMultipleSubscriptionsError(CirculyError):
+    """Raised when a customer has more than one active subscription."""
+    pass
+
+
 def _auth() -> tuple:
     return os.environ.get("CIRCULY_USERNAME", ""), os.environ.get("CIRCULY_PASSWORD", "")
 
@@ -57,9 +62,12 @@ def get_active_subscription(customer_id: str) -> tuple:
 
     if len(data) == 0:
         raise CirculyError(f"0 active subscriptions found for {customer_id}")
+    if len(data) > 1:
+        raise CirculyMultipleSubscriptionsError(
+            f"{len(data)} active subscriptions found for {customer_id}"
+        )
 
-    # If multiple active subs, use the most recently created one
-    sub = sorted(data, key=lambda s: s.get("created_at", ""), reverse=True)[0]
+    sub = data[0]
     sub_id = sub["id"]
     item_name = sub.get("item", {}).get("name", "")
     box_type = extract_box_type(item_name)

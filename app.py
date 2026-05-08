@@ -132,6 +132,11 @@ def submit():
         else:
             _process_end(customer, is_fallback=False)
 
+    except circuly.CirculyMultipleSubscriptionsError as e:
+        logging.warning(f"Multiple subscriptions for {customer_id} — flagged for manual review")
+        notion_log.mark_error(page_id, "manual_review_multiple_subscriptions")
+        return jsonify({"ok": False, "error": "multiple_subscriptions"}), 200
+
     except circuly.CirculyError as e:
         logging.error(f"Circuly error for {customer_id}: {e}")
         notion_log.mark_error(page_id, f"circuly_error: {e}")

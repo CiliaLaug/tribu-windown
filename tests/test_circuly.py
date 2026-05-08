@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from circuly import get_active_subscription, process_buyout, set_end_date, CirculyError
+from circuly import get_active_subscription, process_buyout, set_end_date, CirculyError, CirculyMultipleSubscriptionsError
 
 
 FAKE_SUB = {
@@ -30,15 +30,13 @@ def test_get_active_subscription_none_found(mock_get):
 
 
 @patch("circuly.requests.get")
-def test_get_active_subscription_multiple_picks_newest(mock_get):
-    """With 2+ active subs, should pick the most recently created one, not raise."""
-    older = {**FAKE_SUB, "id": "sub_old", "created_at": "2024-01-01T00:00:00.000000Z"}
-    newer = {**FAKE_SUB, "id": "sub_new", "created_at": "2025-01-01T00:00:00.000000Z"}
+def test_get_active_subscription_multiple_raises(mock_get):
+    """With 2+ active subs, raises CirculyMultipleSubscriptionsError — handle manually."""
     mock_get.return_value.status_code = 200
-    mock_get.return_value.json.return_value = {"data": [older, newer]}
+    mock_get.return_value.json.return_value = {"data": [FAKE_SUB, FAKE_SUB]}
 
-    sub_id, box_type = get_active_subscription("cus_123")
-    assert sub_id == "sub_new"
+    with pytest.raises(CirculyMultipleSubscriptionsError):
+        get_active_subscription("cus_123")
 
 
 @patch("circuly.requests.post")
