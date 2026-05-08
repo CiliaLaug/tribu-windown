@@ -15,31 +15,6 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
-# ── Price tiers ───────────────────────────────────────────────────────────────
-
-_PRICE_TIERS = [
-    (29.99,  ["igel", "maus", "fuchs", "bär", "ente", "reh", "wildschwein"]),
-    (69.99,  ["hase", "wolf", "eichhörnchen", "eichhorn", "waschbär", "waschbar", "eule"]),
-    (99.99,  ["gravitrax", "tiptoi", "schleich", "safari", "brio", "connetix"]),
-    (169.99, ["modu"]),
-]
-
-
-def get_price(box_type: str) -> float:
-    """Return buyout price for a given box_type string (matched by keyword).
-    Longer keywords are checked first so 'waschbär' beats 'bär'."""
-    bt = box_type.lower()
-    candidates = sorted(
-        ((kw, price) for price, keywords in _PRICE_TIERS for kw in keywords),
-        key=lambda x: len(x[0]),
-        reverse=True,
-    )
-    for kw, price in candidates:
-        if kw in bt:
-            return price
-    return 49.99  # fallback for unknown box types
-
-
 def format_price(price: float) -> str:
     """Format price as German locale string: €29,99"""
     return "€" + f"{price:.2f}".replace(".", ",")
@@ -94,7 +69,7 @@ def landing():
             _, box_type = circuly.get_active_subscription(customer["customer_id"])
         except circuly.CirculyError:
             box_type = ""
-    price = get_price(box_type)
+    price = circuly.get_price(box_type)
     price_str = format_price(price)
 
     return render_template("landing.html", token=token, price=price, price_str=price_str)
@@ -125,7 +100,7 @@ def submit():
         if choice == "keep":
             sub_id, box_type = circuly.get_active_subscription(customer_id)
             notion_log.store_box_type(page_id, box_type)
-            price_str = format_price(get_price(box_type))
+            price_str = format_price(circuly.get_price(box_type))
             circuly.process_buyout(sub_id)
             freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation(name, price_str))
             notion_log.mark_processed(page_id, "keep")
