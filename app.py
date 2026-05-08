@@ -44,7 +44,7 @@ def _process_end(customer: dict, is_fallback: bool = False) -> None:
         notion_log.mark_processed(page_id, status)
 
 
-@app.route("/bye")
+@app.route("/")
 def landing():
     token = request.args.get("token", "")
     customer = notion_log.get_customer_by_token(token)

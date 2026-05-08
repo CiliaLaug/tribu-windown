@@ -18,6 +18,7 @@ FAKE_CUSTOMER = {
     "token": "validtoken",
     "freshdesk_ticket_id": 9001,
     "status": "pending",
+    "name": "Test",
 }
 
 
@@ -25,7 +26,7 @@ FAKE_CUSTOMER = {
 
 @patch("app.notion_log.get_customer_by_token", return_value=None)
 def test_landing_invalid_token(mock_notion, client):
-    resp = client.get("/bye?token=badtoken")
+    resp = client.get("/?token=badtoken")
     assert resp.status_code == 200
     assert "Tribu Box" in resp.data.decode()
     # Should not show the choice page — neutral error
@@ -36,13 +37,13 @@ def test_landing_invalid_token(mock_notion, client):
 def test_landing_already_processed(mock_notion, client):
     customer = {**FAKE_CUSTOMER, "status": "keep"}
     mock_notion.return_value = customer
-    resp = client.get("/bye?token=validtoken")
+    resp = client.get("/?token=validtoken")
     assert b"bereits" in resp.data
 
 
 @patch("app.notion_log.get_customer_by_token", return_value=FAKE_CUSTOMER)
 def test_landing_pending_shows_page(mock_notion, client):
-    resp = client.get("/bye?token=validtoken")
+    resp = client.get("/?token=validtoken")
     assert resp.status_code == 200
     assert b"49,99" in resp.data
 
@@ -66,9 +67,10 @@ def test_submit_already_processed(mock_notion, client):
 @patch("app.circuly.get_active_subscription", return_value=("sub_123", "hase"))
 @patch("app.circuly.process_buyout")
 @patch("app.freshdesk.reply_and_close")
+@patch("app.notion_log.store_box_type")
 @patch("app.notion_log.mark_processed")
 @patch("app.notion_log.get_customer_by_token", return_value=FAKE_CUSTOMER)
-def test_submit_keep_success(mock_notion, mock_mark, mock_fd, mock_buyout, mock_sub, client):
+def test_submit_keep_success(mock_notion, mock_mark, mock_store, mock_fd, mock_buyout, mock_sub, client):
     resp = client.post("/submit", json={"token": "validtoken", "choice": "keep"})
     assert resp.status_code == 200
     assert resp.json["ok"] is True
@@ -80,9 +82,10 @@ def test_submit_keep_success(mock_notion, mock_mark, mock_fd, mock_buyout, mock_
 @patch("app.circuly.get_active_subscription", return_value=("sub_123", "hase"))
 @patch("app.circuly.set_end_date")
 @patch("app.freshdesk.reply_and_close")
+@patch("app.notion_log.store_box_type")
 @patch("app.notion_log.mark_processed")
 @patch("app.notion_log.get_customer_by_token", return_value=FAKE_CUSTOMER)
-def test_submit_end_standard_box(mock_notion, mock_mark, mock_fd, mock_end, mock_sub, client):
+def test_submit_end_standard_box(mock_notion, mock_mark, mock_store, mock_fd, mock_end, mock_sub, client):
     resp = client.post("/submit", json={"token": "validtoken", "choice": "end"})
     assert resp.status_code == 200
     assert resp.json["ok"] is True
@@ -93,9 +96,10 @@ def test_submit_end_standard_box(mock_notion, mock_mark, mock_fd, mock_end, mock
 
 @patch("app.circuly.get_active_subscription", return_value=("sub_123", "igel"))
 @patch("app.freshdesk.reply_and_close")
+@patch("app.notion_log.store_box_type")
 @patch("app.notion_log.mark_error")
 @patch("app.notion_log.get_customer_by_token", return_value=FAKE_CUSTOMER)
-def test_submit_end_special_box(mock_notion, mock_error, mock_fd, mock_sub, client):
+def test_submit_end_special_box(mock_notion, mock_error, mock_store, mock_fd, mock_sub, client):
     resp = client.post("/submit", json={"token": "validtoken", "choice": "end"})
     assert resp.status_code == 200
     assert resp.json["ok"] is True
@@ -120,8 +124,9 @@ def test_cron_wrong_secret(client):
 @patch("app.circuly.get_active_subscription", return_value=("sub_123", "hase"))
 @patch("app.circuly.set_end_date")
 @patch("app.freshdesk.reply_and_close")
+@patch("app.notion_log.store_box_type")
 @patch("app.notion_log.mark_processed")
-def test_cron_valid_secret_processes_customers(mock_mark, mock_fd, mock_end, mock_sub, mock_expired, client):
+def test_cron_valid_secret_processes_customers(mock_mark, mock_store, mock_fd, mock_end, mock_sub, mock_expired, client):
     resp = client.post(
         "/cron/fallback",
         headers={"X-Cron-Secret": "testsecret"},
