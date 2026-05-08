@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from circuly import get_active_subscription, process_buyout, set_end_date, CirculyError, CirculyMultipleSubscriptionsError
+from circuly import get_active_subscription, process_buyout, set_end_date, CirculyError, CirculyNoSubscriptionError, CirculyMultipleSubscriptionsError
 
 
 FAKE_SUB = {
@@ -25,7 +25,7 @@ def test_get_active_subscription_none_found(mock_get):
     mock_get.return_value.status_code = 200
     mock_get.return_value.json.return_value = {"data": []}
 
-    with pytest.raises(CirculyError, match="0 active subscriptions"):
+    with pytest.raises(CirculyNoSubscriptionError, match="0 active subscriptions"):
         get_active_subscription("cus_123")
 
 

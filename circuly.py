@@ -18,6 +18,11 @@ class CirculyError(Exception):
     pass
 
 
+class CirculyNoSubscriptionError(CirculyError):
+    """Raised when a customer has no active subscription."""
+    pass
+
+
 class CirculyMultipleSubscriptionsError(CirculyError):
     """Raised when a customer has more than one active subscription."""
     pass
@@ -61,7 +66,7 @@ def get_active_subscription(customer_id: str) -> tuple:
     data = resp.json().get("data", [])
 
     if len(data) == 0:
-        raise CirculyError(f"0 active subscriptions found for {customer_id}")
+        raise CirculyNoSubscriptionError(f"0 active subscriptions found for {customer_id}")
     if len(data) > 1:
         raise CirculyMultipleSubscriptionsError(
             f"{len(data)} active subscriptions found for {customer_id}"

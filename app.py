@@ -132,6 +132,11 @@ def submit():
         else:
             _process_end(customer, is_fallback=False)
 
+    except circuly.CirculyNoSubscriptionError as e:
+        logging.warning(f"No active subscription for {customer_id} — customer inactive")
+        notion_log.mark_error(page_id, "inactive_no_active_subscription")
+        return jsonify({"ok": False, "error": "no_subscription"}), 200
+
     except circuly.CirculyMultipleSubscriptionsError as e:
         logging.warning(f"Multiple subscriptions for {customer_id} — flagged for manual review")
         notion_log.mark_error(page_id, "manual_review_multiple_subscriptions")
