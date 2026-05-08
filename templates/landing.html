@@ -150,6 +150,27 @@
       opacity: 0.55;
     }
 
+    .loading-view {
+      display: none;
+      padding: 16px 0;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--green-light);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
     @media (max-width: 540px) {
       .card { padding: 32px 24px; }
       .headline { font-size: 1.4rem; }
@@ -183,6 +204,11 @@
       </button>
     </div>
 
+    <div id="loading-view" class="loading-view">
+      <div class="spinner"></div>
+      <p class="loading-text">Einen Moment bitte…</p>
+    </div>
+
     <div id="confirm-view" style="display:none">
       <p class="confirmation">
         <span class="big-emoji" id="confirm-emoji"></span>
@@ -214,8 +240,8 @@
     };
 
     function submitChoice(choice) {
-      const card = document.getElementById('main-card');
-      card.classList.add('loading');
+      document.getElementById('choice-view').style.display = 'none';
+      document.getElementById('loading-view').style.display = 'block';
 
       fetch('/submit', {
         method: 'POST',
@@ -224,21 +250,18 @@
       })
       .then(r => r.json())
       .then(data => {
-        card.classList.remove('loading');
+        document.getElementById('loading-view').style.display = 'none';
         if (data.ok) {
-          document.getElementById('choice-view').style.display = 'none';
           const msg = MESSAGES[choice];
           document.getElementById('confirm-emoji').textContent = msg.emoji;
           document.getElementById('confirm-text').textContent = msg.text;
           document.getElementById('confirm-view').style.display = 'block';
         } else {
-          document.getElementById('choice-view').style.display = 'none';
           document.getElementById('error-view').style.display = 'block';
         }
       })
       .catch(() => {
-        card.classList.remove('loading');
-        document.getElementById('choice-view').style.display = 'none';
+        document.getElementById('loading-view').style.display = 'none';
         document.getElementById('error-view').style.display = 'block';
       });
     }
