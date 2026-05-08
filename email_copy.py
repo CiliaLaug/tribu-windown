@@ -58,5 +58,11 @@ def fallback_standard(name: str = "") -> str:
 
 
 def fallback_special_box(name: str = "") -> str:
-    """14-day non-responder — special box. Same message as return_confirmation_special_box."""
-    return return_confirmation_special_box(name)
+    """14-day non-responder — special box. Acknowledges no response, asks to keep/donate/recycle."""
+    return f"""
+{_greeting(name)}
+<p>da wir innerhalb von 14 Tagen keine Rückmeldung von dir erhalten haben, haben wir dein Abo automatisch beendet.</p>
+<p>Für Boxen wie deine ist es für uns am einfachsten, wenn du sie einfach behältst – gib sie gerne an Familie oder Freunde weiter, verschenke sie, spende sie oder recycle sie. Du musst nichts weiter tun. 🧡</p>
+<p>Vielen Dank, dass du Teil der Tribu-Familie warst.</p>
+{_signature()}
+"""
