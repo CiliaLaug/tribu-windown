@@ -113,3 +113,22 @@ def test_cron_no_secret(client):
 def test_cron_wrong_secret(client):
     resp = client.post("/cron/fallback", headers={"X-Cron-Secret": "wrongsecret"})
     assert resp.status_code == 403
+
+
+@patch.dict("os.environ", {"CRON_SECRET": "testsecret"})
+@patch("app.notion_log.get_pending_expired", return_value=[FAKE_CUSTOMER])
+@patch("app.circuly.get_active_subscription", return_value=("sub_123", "hase"))
+@patch("app.circuly.set_end_date")
+@patch("app.freshdesk.reply_and_close")
+@patch("app.notion_log.mark_processed")
+def test_cron_valid_secret_processes_customers(mock_mark, mock_fd, mock_end, mock_sub, mock_expired, client):
+    resp = client.post(
+        "/cron/fallback",
+        headers={"X-Cron-Secret": "testsecret"},
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["processed"] == 1
+    assert data["errors"] == 0
+    mock_end.assert_called_once()
+    mock_mark.assert_called_once_with("page-abc", "fallback")

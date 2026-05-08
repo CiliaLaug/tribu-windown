@@ -1,4 +1,5 @@
 import os
+import hmac
 import logging
 from datetime import date, timedelta
 from flask import Flask, request, render_template, jsonify
@@ -59,7 +60,7 @@ def landing():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     token = data.get("token", "")
     choice = data.get("choice", "")
 
@@ -108,7 +109,7 @@ def submit():
 def cron_fallback():
     secret = request.headers.get("X-Cron-Secret", "")
     cron_secret = os.environ.get("CRON_SECRET", "")
-    if not cron_secret or secret != cron_secret:
+    if not cron_secret or not hmac.compare_digest(secret, cron_secret):
         return jsonify({"error": "forbidden"}), 403
 
     cutoff = date.today() - timedelta(days=14)
@@ -129,4 +130,4 @@ def cron_fallback():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
