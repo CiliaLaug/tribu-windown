@@ -1,0 +1,24 @@
+name: Daily 14-day fallback
+
+on:
+  schedule:
+    # 07:00 UTC = 08:00 CET / 09:00 CEST
+    - cron: '0 7 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  fallback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger /cron/fallback
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            https://tribu-winddown-landing.onrender.com/cron/fallback \
+            -H "X-Cron-Secret: ${CRON_SECRET}")
+          echo "HTTP status: $response"
+          if [ "$response" != "200" ]; then
+            echo "ERROR: fallback endpoint returned $response"
+            exit 1
+          fi
