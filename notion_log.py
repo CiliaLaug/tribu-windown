@@ -31,6 +31,7 @@ def _parse_page(page: dict) -> dict:
         "sent_at": p["sent_at"]["date"]["start"] if p["sent_at"]["date"] else None,
         "status": p["status"]["select"]["name"] if p["status"]["select"] else None,
         "error_detail": _text(p["error_detail"]),
+        "box_type": _text(p["box_type"]) if "box_type" in p else "",
     }
 
 
@@ -44,6 +45,17 @@ def get_customer_by_token(token: str) -> Optional[dict]:
     if not pages:
         return None
     return _parse_page(pages[0])
+
+
+def store_box_type(page_id: str, box_type: str) -> None:
+    """Write box_type to Notion row (called after Circuly subscription lookup)."""
+    client = get_client()
+    client.pages.update(
+        page_id=page_id,
+        properties={
+            "box_type": {"rich_text": [{"text": {"content": box_type}}]},
+        },
+    )
 
 
 def mark_processed(page_id: str, status: str) -> None:

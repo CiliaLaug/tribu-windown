@@ -4,89 +4,177 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tribu Box – Deine letzte Entscheidung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    @font-face {
+      font-family: 'Lazydog';
+      src: url('https://www.tribu-box.com/font/Lazydog.otf') format('opentype');
+      font-weight: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Glacial Indifference';
+      src: url('https://www.tribu-box.com/font/GlacialIndifference-Regular.otf') format('opentype');
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Glacial Indifference';
+      src: url('https://www.tribu-box.com/font/GlacialIndifference-Bold.otf') format('opentype');
+      font-weight: 700;
+      font-display: swap;
+    }
+
+    :root {
+      --green: #72d4aa;
+      --green-dark: #52b88e;
+      --green-light: #d9f7ea;
+      --text: #223037;
+      --text-muted: #4f595f;
+      --bg: #f0faf5;
+      --white: #ffffff;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #fdf8f4;
-      color: #333;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 48px 20px 64px;
     }
-    .logo { margin-bottom: 32px; }
-    .logo img { height: 48px; }
+
+    .logo-wrap {
+      margin-bottom: 36px;
+    }
+    .logo-wrap img {
+      height: 44px;
+      display: block;
+    }
+
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 40px;
-      max-width: 520px;
+      background: var(--white);
+      border-radius: 20px;
+      padding: 44px 40px;
+      max-width: 500px;
       width: 100%;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 24px rgba(34, 48, 55, 0.08);
       text-align: center;
     }
+
+    .wave {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
     .headline {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #222;
+      font-family: 'Lazydog', 'Inter', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.3;
     }
+
     .subtext {
-      font-size: 1rem;
-      color: #666;
+      font-size: 0.975rem;
+      color: var(--text-muted);
       margin-bottom: 36px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
+
     .keep-btn {
       display: block;
       width: 100%;
-      padding: 18px;
-      background: #f4a261;
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 600;
+      padding: 17px 24px;
+      background: var(--green);
+      color: var(--text);
+      font-family: 'Glacial Indifference', 'Inter', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
-      margin-bottom: 20px;
-      transition: background 0.2s;
+      margin-bottom: 18px;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
     }
-    .keep-btn:hover { background: #e07b3a; }
+    .keep-btn:hover {
+      background: var(--green-dark);
+    }
+    .keep-btn:active {
+      transform: scale(0.98);
+    }
+
     .return-link {
-      display: block;
-      color: #999;
-      font-size: 0.9rem;
+      display: inline-block;
+      color: var(--text-muted);
+      font-size: 0.875rem;
       text-decoration: underline;
+      text-underline-offset: 3px;
       cursor: pointer;
       background: none;
       border: none;
-      width: 100%;
+      font-family: 'Inter', sans-serif;
+      transition: color 0.15s;
     }
-    .return-link:hover { color: #666; }
+    .return-link:hover { color: var(--text); }
+
     .confirmation {
-      font-size: 1.1rem;
-      color: #2a9d5c;
-      font-weight: 500;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .confirmation .big-emoji {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    .error-msg {
+      font-size: 0.95rem;
+      color: #c0392b;
       line-height: 1.6;
     }
-    .loading .keep-btn, .loading .return-link { pointer-events: none; opacity: 0.6; }
+
+    .loading .keep-btn,
+    .loading .return-link {
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    @media (max-width: 540px) {
+      .card { padding: 32px 24px; }
+      .headline { font-size: 1.4rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="https://cdn.shopify.com/s/files/1/0449/5989/1607/files/tribu-logo.png" alt="Tribu Box" onerror="this.style.display='none'">
+
+  <div class="logo-wrap">
+    <img src="https://tribu-cms.s3.eu-central-1.amazonaws.com/large_3_9c19d51029.png"
+         alt="Tribu Box"
+         onerror="this.src='https://cdn.shopify.com/s/files/1/0449/5989/1607/files/tribu-logo.png'">
   </div>
 
   <div class="card" id="main-card">
+
     <div id="choice-view">
-      <p class="headline">Ein letztes Angebot von uns 🧡</p>
+      <span class="wave">👋</span>
+      <h1 class="headline">Ein letztes Angebot von uns</h1>
       <p class="subtext">
         Tribu Box verabschiedet sich — und möchte dir noch ein letztes Angebot machen.<br><br>
         Du kannst deine aktuelle Box für einmalig <strong>€49,99</strong> behalten,
         oder du sendest sie zurück.
       </p>
+
       <button class="keep-btn" onclick="submitChoice('keep')">
         ✨ Deine Box für einmalig €49,99 behalten
       </button>
@@ -96,21 +184,32 @@
     </div>
 
     <div id="confirm-view" style="display:none">
-      <p class="confirmation" id="confirm-text"></p>
+      <p class="confirmation">
+        <span class="big-emoji" id="confirm-emoji"></span>
+        <span id="confirm-text"></span>
+      </p>
     </div>
 
     <div id="error-view" style="display:none">
-      <p style="color:#c0392b;">
-        Etwas ist schiefgelaufen. Bitte versuche es später erneut oder schreib uns an hello@tribu-box.com.
+      <p class="error-msg">
+        Etwas ist schiefgelaufen. Bitte versuche es später erneut oder
+        schreib uns an <a href="mailto:hello@tribu-box.com">hello@tribu-box.com</a>.
       </p>
     </div>
+
   </div>
 
   <script>
     const TOKEN = {{ token | tojson }};
     const MESSAGES = {
-      keep: "Wunderbar! Wir berechnen €49,99 und deine Box bleibt bei dir. Du bekommst eine Bestätigung per E-Mail. 🧡",
-      end:  "Alles klar. Wir organisieren die Rücksendung — du bekommst alle Details per E-Mail. 🧡"
+      keep: {
+        emoji: "🧡",
+        text: "Wunderbar! Wir berechnen €49,99 und deine Box bleibt bei dir. Du bekommst eine Bestätigung per E-Mail."
+      },
+      end: {
+        emoji: "👍",
+        text: "Alles klar. Wir organisieren die Rücksendung — du bekommst alle Details per E-Mail."
+      }
     };
 
     function submitChoice(choice) {
@@ -120,14 +219,16 @@
       fetch('/submit', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({token: TOKEN, choice: choice})
+        body: JSON.stringify({ token: TOKEN, choice: choice })
       })
       .then(r => r.json())
       .then(data => {
         card.classList.remove('loading');
         if (data.ok) {
           document.getElementById('choice-view').style.display = 'none';
-          document.getElementById('confirm-text').textContent = MESSAGES[choice];
+          const msg = MESSAGES[choice];
+          document.getElementById('confirm-emoji').textContent = msg.emoji;
+          document.getElementById('confirm-text').textContent = msg.text;
           document.getElementById('confirm-view').style.display = 'block';
         } else {
           document.getElementById('choice-view').style.display = 'none';
@@ -141,5 +242,6 @@
       });
     }
   </script>
+
 </body>
 </html>

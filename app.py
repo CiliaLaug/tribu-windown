@@ -26,6 +26,7 @@ def _process_end(customer: dict, is_fallback: bool = False) -> None:
     ticket_id = customer["freshdesk_ticket_id"]
 
     sub_id, box_type = circuly.get_active_subscription(customer_id)
+    notion_log.store_box_type(page_id, box_type)
 
     if circuly.is_special_box(box_type):
         # Special box: send keep/donate/recycle email, flag for manual handling
@@ -80,7 +81,8 @@ def submit():
 
     try:
         if choice == "keep":
-            sub_id, _ = circuly.get_active_subscription(customer_id)
+            sub_id, box_type = circuly.get_active_subscription(customer_id)
+            notion_log.store_box_type(page_id, box_type)
             circuly.process_buyout(sub_id)
             freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation())
             notion_log.mark_processed(page_id, "keep")
