@@ -21,7 +21,7 @@ def return_confirmation_standard() -> str:
     """Customer chose to return — standard box (pending_return path)."""
     return f"""
 <p>Hallo,</p>
-<p>alles klar! Wir kümmern uns um die Rücksendung und melden uns in Kürze mit allen Details per E-Mail.</p>
+<p>alles klar! Du erhältst dein Rücksendeetikett in Kürze per E-Mail – bitte sende die Box innerhalb der nächsten 7 Tage zurück, um zusätzliche Kosten zu vermeiden.</p>
 <p>Vielen Dank für die schöne Zeit mit uns. 🧡</p>
 {SIGNATURE}
 """
