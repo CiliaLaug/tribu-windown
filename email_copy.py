@@ -42,7 +42,7 @@ def fallback_standard() -> str:
     """14-day non-responder — standard box. Subscription set to pending_return automatically."""
     return f"""
 <p>Hallo,</p>
-<p>da wir innerhalb von 14 Tagen keine Rückmeldung von dir erhalten haben, haben wir dein Abo automatisch beendet. Du erhältst in Kürze alle Details zur Rücksendung deiner Box per E-Mail.</p>
+<p>da wir innerhalb von 14 Tagen keine Rückmeldung von dir erhalten haben, haben wir dein Abo automatisch beendet. Du erhältst dein Rücksendeetikett in Kürze per E-Mail – bitte sende die Box innerhalb der nächsten 7 Tage zurück, um zusätzliche Kosten zu vermeiden.</p>
 <p>Vielen Dank für die schöne Zeit mit uns. 🧡</p>
 {SIGNATURE}
 """
