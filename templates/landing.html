@@ -171,12 +171,12 @@
       <h1 class="headline">Ein letztes Angebot von uns</h1>
       <p class="subtext">
         Tribu Box verabschiedet sich — und möchte dir noch ein letztes Angebot machen.<br><br>
-        Du kannst deine aktuelle Box für einmalig <strong>€49,99</strong> behalten,
+        Du kannst deine aktuelle Box für einmalig <strong>{{ price_str }}</strong> behalten,
         oder du sendest sie zurück.
       </p>
 
       <button class="keep-btn" onclick="submitChoice('keep')">
-        ✨ Deine Box für einmalig €49,99 behalten
+        ✨ Deine Box für einmalig {{ price_str }} behalten
       </button>
       <button class="return-link" onclick="submitChoice('end')">
         Meine Box zurücksenden
@@ -201,10 +201,11 @@
 
   <script>
     const TOKEN = {{ token | tojson }};
+    const PRICE_STR = {{ price_str | tojson }};
     const MESSAGES = {
       keep: {
         emoji: "🧡",
-        text: "Wunderbar! Wir berechnen €49,99 und deine Box bleibt bei dir. Du bekommst eine Bestätigung per E-Mail."
+        text: "Wunderbar! Wir berechnen " + PRICE_STR + " und deine Box bleibt bei dir. Du bekommst eine Bestätigung per E-Mail."
       },
       end: {
         emoji: "👍",

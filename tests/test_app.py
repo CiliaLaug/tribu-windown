@@ -75,7 +75,10 @@ def test_submit_keep_success(mock_notion, mock_mark, mock_store, mock_fd, mock_b
     assert resp.status_code == 200
     assert resp.json["ok"] is True
     mock_buyout.assert_called_once_with("sub_123")
+    # freshdesk called with email body containing the hase price (€69,99)
     mock_fd.assert_called_once()
+    call_body = mock_fd.call_args[0][1]
+    assert "69,99" in call_body
     mock_mark.assert_called_once_with("page-abc", "keep")
 
 

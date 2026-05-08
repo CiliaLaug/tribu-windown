@@ -15,6 +15,31 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
+# ── Price tiers ───────────────────────────────────────────────────────────────
+
+_PRICE_TIERS = [
+    (29.99,  ["igel", "maus", "fuchs", "bär", "ente", "reh", "wildschwein"]),
+    (69.99,  ["hase", "wolf", "eichhörnchen", "eichhorn", "waschbär", "waschbar", "eule"]),
+    (99.99,  ["gravitrax", "tiptoi", "schleich", "brio", "connetix"]),
+    (169.99, ["modu"]),
+]
+
+
+def get_price(box_type: str) -> float:
+    """Return buyout price for a given box_type string (matched by keyword)."""
+    bt = box_type.lower()
+    for price, keywords in _PRICE_TIERS:
+        if any(kw in bt for kw in keywords):
+            return price
+    return 49.99  # fallback for unknown box types
+
+
+def format_price(price: float) -> str:
+    """Format price as German locale string: €29,99"""
+    return "€" + f"{price:.2f}".replace(".", ",")
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _process_end(customer: dict, is_fallback: bool = False) -> None:
     """
@@ -24,25 +49,23 @@ def _process_end(customer: dict, is_fallback: bool = False) -> None:
     page_id = customer["page_id"]
     customer_id = customer["customer_id"]
     ticket_id = customer["freshdesk_ticket_id"]
+    name = customer.get("name", "")
 
     sub_id, box_type = circuly.get_active_subscription(customer_id)
     notion_log.store_box_type(page_id, box_type)
 
-    name = customer.get("name", "")
-
     if circuly.is_special_box(box_type):
-        # Special box: send keep/donate/recycle email, flag for manual handling
         body = email_copy.fallback_special_box(name) if is_fallback else email_copy.return_confirmation_special_box(name)
         freshdesk.reply_and_close(ticket_id, body)
         notion_log.mark_error(page_id, "manual_review_end_subscription")
     else:
-        # Standard box: set end date → pending_return, send return email
         circuly.set_end_date(sub_id, date.today().isoformat())
         body = email_copy.fallback_standard(name) if is_fallback else email_copy.return_confirmation_standard(name)
         freshdesk.reply_and_close(ticket_id, body)
-        status = "fallback" if is_fallback else "end"
-        notion_log.mark_processed(page_id, status)
+        notion_log.mark_processed(page_id, "fallback" if is_fallback else "end")
 
+
+# ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def landing():
@@ -58,7 +81,11 @@ def landing():
             message="Du hast bereits eine Entscheidung getroffen. Vielen Dank!"
         )
 
-    return render_template("landing.html", token=token)
+    box_type = customer.get("box_type", "")
+    price = get_price(box_type)
+    price_str = format_price(price)
+
+    return render_template("landing.html", token=token, price=price, price_str=price_str)
 
 
 @app.route("/submit", methods=["POST"])
@@ -80,13 +107,15 @@ def submit():
     page_id = customer["page_id"]
     customer_id = customer["customer_id"]
     ticket_id = customer["freshdesk_ticket_id"]
+    name = customer.get("name", "")
 
     try:
         if choice == "keep":
             sub_id, box_type = circuly.get_active_subscription(customer_id)
             notion_log.store_box_type(page_id, box_type)
+            price_str = format_price(get_price(box_type))
             circuly.process_buyout(sub_id)
-            freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation(customer.get("name", "")))
+            freshdesk.reply_and_close(ticket_id, email_copy.keep_confirmation(name, price_str))
             notion_log.mark_processed(page_id, "keep")
         else:
             _process_end(customer, is_fallback=False)
