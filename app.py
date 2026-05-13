@@ -38,7 +38,7 @@ def _process_end(customer: dict, is_fallback: bool = False) -> None:
     if circuly.is_special_box(box_type):
         body = email_copy.fallback_special_box(name) if is_fallback else email_copy.return_confirmation_special_box(name)
         freshdesk.reply_and_close(ticket_id, body)
-        notion_log.mark_error(page_id, "manual_review_end_subscription")
+        notion_log.mark_processed(page_id, "manual-end")
     else:
         circuly.set_end_date(sub_id, date.today().isoformat())
         body = email_copy.fallback_standard(name) if is_fallback else email_copy.return_confirmation_standard(name)
