@@ -15,6 +15,11 @@ def _greeting(name: str) -> str:
     return f"<p>Hallo {name},</p>" if name else "<p>Hallo,</p>"
 
 
+def _voucher() -> str:
+    return """<p>Als kleines extra Dankeschön: Mit dem Code <strong>SMXC9RJV8SQF</strong> bekommst du 40% Rabatt auf jede weitere Box auf shop.tribu-box.com — von der Igel-Box (0 Monate+) bis zur Wildschwein-Box (18 Monate+) — für dich oder für jemanden, dem du etwas Besonderes schenken möchtest. 💛<br>
+Viele Grüße aus Berlin in den Schwarzwald! Cilia &amp; Daniela (co-founders)</p>"""
+
+
 def keep_confirmation(name: str = "") -> str:
     """Customer chose to keep their box — buyout processing."""
     return f"""
@@ -22,6 +27,7 @@ def keep_confirmation(name: str = "") -> str:
 <p>wie schön! Deine Box gehört jetzt offiziell dir. 🎉 Deine Zahlung wird gerade verarbeitet – du musst nichts weiter tun.</p>
 <p>Deine Rechnung findest du innerhalb von 24 Stunden in deinem Kundenkonto.</p>
 <p>Wir hoffen, dass sie noch lange Freude bringt. Von ganzem Herzen danke, dass du Teil der Tribu-Familie warst.</p>
+{_voucher()}
 {_signature()}
 """
 
@@ -32,6 +38,7 @@ def return_confirmation_standard(name: str = "") -> str:
 {_greeting(name)}
 <p>alles klar! Du erhältst dein Rücksendeetikett in Kürze per E-Mail – bitte sende die Box innerhalb der nächsten 7 Tage zurück, um zusätzliche Kosten zu vermeiden.</p>
 <p>Vielen Dank für die schöne Zeit mit uns. Es war uns wirklich eine Freude! 🧡</p>
+{_voucher()}
 {_signature()}
 """
 
@@ -44,6 +51,7 @@ def return_confirmation_special_box(name: str = "") -> str:
 <p>wir haben deine Anfrage erhalten. Für Boxen wie deine ist es für uns am einfachsten, wenn du sie einfach behältst – gib sie gerne an Familie oder Freunde weiter, verschenke sie, spende sie oder recycle sie.</p>
 <p>Wir kümmern uns darum, dein Abo auf unserer Seite zu beenden. Du musst nichts weiter tun. 🧡</p>
 <p>Vielen Dank, dass du Teil der Tribu-Familie warst.</p>
+{_voucher()}
 {_signature()}
 """
 
