@@ -146,7 +146,7 @@ def cron_fallback():
     if not cron_secret or not hmac.compare_digest(secret, cron_secret):
         return jsonify({"error": "forbidden"}), 403
 
-    cutoff = date.today() - timedelta(days=14)
+    cutoff = date.today() - timedelta(days=20)
     expired = notion_log.get_pending_expired(cutoff)
     logging.info(f"Cron: processing {len(expired)} expired customers")
 
